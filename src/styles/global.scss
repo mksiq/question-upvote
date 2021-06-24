@@ -12,3 +12,13 @@ body {
 body, input, button, textarea {
   font: 400 16px 'Roboto', sans-serif;
 }
+
+.error-message {
+  margin-top: 20px;
+  color: #ea4335;
+  font-weight: 500;
+  font-size: 20px;
+  border-radius: 10px;
+  padding: 10px;
+  background-color: #FFF;
+}

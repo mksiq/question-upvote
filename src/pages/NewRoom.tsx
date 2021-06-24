@@ -2,11 +2,36 @@ import illustrationImg from '../assets/images/illustration.svg';
 import logoImg from '../assets/images/logo.svg';
 import '../styles/auth.scss';
 import { Button } from '../components/Button';
-import { Link } from 'react-router-dom';
+import { Link, useHistory } from 'react-router-dom';
 import { useAuth } from '../hook/useAuth';
+import { FormEvent, useState } from 'react';
+import { database } from '../services/firebase';
 
 export function NewRoom() {
   const { user } = useAuth();
+
+  const history = useHistory();
+
+  const [newRoom, setNewRoom] = useState('');
+
+  async function handleCreateRoom(e: FormEvent) {
+    e.preventDefault();
+
+    if (newRoom.trim() === '') {
+      return;
+    }
+
+    const roomRef = database.ref('rooms');
+
+    const firebaseRoom = await roomRef.push({
+      title: newRoom,
+      creatorId: user?.id,
+      creationDate: Date.now(),
+    });
+
+    history.push(`/rooms/${firebaseRoom.key}`);
+  }
+
   return (
     <div id="page-auth">
       <aside>
@@ -18,8 +43,8 @@ export function NewRoom() {
         <div className="main-content">
           <img src={logoImg} alt="" />
           <h2>Create new Room</h2>
-          <form>
-            <input type="text" placeholder="Room name" />
+          <form onSubmit={handleCreateRoom}>
+            <input type="text" placeholder="Room name" onChange={(e) => setNewRoom(e.target.value)} value={newRoom} />
             <br />
             <Button type="submit">Create Room</Button>
           </form>

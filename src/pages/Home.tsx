@@ -5,10 +5,14 @@ import '../styles/auth.scss';
 import { Button } from '../components/Button';
 import { useHistory } from 'react-router-dom';
 import { useAuth } from '../hook/useAuth';
+import { FormEvent, useState } from 'react';
+import { database } from '../services/firebase';
 
 export function Home() {
   const history = useHistory();
   const { user, signInWithGoogle } = useAuth();
+  const [room, setRoom] = useState('');
+  const [error, setError] = useState(false);
 
   async function handleCreateRoom() {
     if (!user) {
@@ -18,6 +22,22 @@ export function Home() {
     history.push('/rooms/new');
   }
 
+  async function handleJoinRoom(e: FormEvent) {
+    e.preventDefault();
+    if (room.trim() === '') {
+      return;
+    }
+
+    const roomRef = await database.ref(`rooms/${room}`).get();
+
+    if (!roomRef.exists()) {
+      setError(true);
+      return;
+    }
+    setError(false);
+
+    history.push(`/rooms/${room}`);
+  }
   return (
     <div id="page-auth">
       <aside>
@@ -33,10 +53,16 @@ export function Home() {
             Create your room with Google
           </button>
           <div className="separator">Enter a room</div>
-          <form>
-            <input type="text" placeholder="Enter the room code" />
+          <form onSubmit={handleJoinRoom}>
+            <input
+              type="text"
+              placeholder="Enter the room code"
+              onChange={(e) => setRoom(e.target.value)}
+              value={room}
+            />
             <br />
             <Button type="submit">Join</Button>
+            {error ? <div className="error-message">Room does not exist. 😞</div> : <></>}
           </form>
         </div>
       </main>
