@@ -1,9 +1,9 @@
-import { Home } from './pages/Home';
-import { NewRoom } from './pages/NewRoom';
+import { Home } from './pages/home';
+import { NewRoom } from './pages/new-room';
 
 import { BrowserRouter, Switch, Route } from 'react-router-dom';
 import { AuthContextProvider } from './contexts/AuthContexts';
-import { Room } from './pages/Room';
+import { Room } from './pages/room';
 
 function App() {
   return (

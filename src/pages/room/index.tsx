@@ -1,13 +1,13 @@
-import logoImg from '../assets/images/logo.svg';
-import '../styles/room.scss';
-import { Button } from '../components/Button';
-import { RoomCode } from '../components/RoomCode';
+import logoImg from '../../assets/images/logo.svg';
+import './styles.scss';
+import { Button } from '../../components/Button';
+import { RoomCode } from '../../components/RoomCode';
 import { Link, useParams } from 'react-router-dom';
-import { FormEvent, useEffect, useState } from 'react';
-import { useAuth } from '../hook/useAuth';
-import { database } from '../services/firebase';
-import { Question } from '../components/Question';
-import { useRoom } from '../hook/useRoom';
+import { FormEvent, useState } from 'react';
+import { useAuth } from '../../hook/useAuth';
+import { database } from '../../services/firebase';
+import { Question } from '../../components/Question';
+import { useRoom } from '../../hook/useRoom';
 
 type RoomParams = {
   id: string;

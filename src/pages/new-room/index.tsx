@@ -1,11 +1,11 @@
-import illustrationImg from '../assets/images/illustration.svg';
-import logoImg from '../assets/images/logo.svg';
-import '../styles/auth.scss';
-import { Button } from '../components/Button';
+import illustrationImg from '../../assets/images/illustration.svg';
+import logoImg from '../../assets/images/logo.svg';
+import '../../styles/auth.scss';
+import { Button } from '../../components/Button';
 import { Link, useHistory } from 'react-router-dom';
-import { useAuth } from '../hook/useAuth';
+import { useAuth } from '../../hook/useAuth';
 import { FormEvent, useState } from 'react';
-import { database } from '../services/firebase';
+import { database } from '../../services/firebase';
 
 export function NewRoom() {
   const { user } = useAuth();
