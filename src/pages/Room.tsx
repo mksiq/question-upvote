@@ -6,33 +6,19 @@ import { Link, useParams } from 'react-router-dom';
 import { FormEvent, useEffect, useState } from 'react';
 import { useAuth } from '../hook/useAuth';
 import { database } from '../services/firebase';
-import { convertCompilerOptionsFromJson } from 'typescript';
+import { Question } from '../components/Question';
+import { useRoom } from '../hook/useRoom';
 
 type RoomParams = {
   id: string;
 };
 
-type Question = {
-  id?: string;
-  author: {
-    name: string;
-    avatar: string;
-  };
-  content: string;
-  isAnswered: string;
-  isHighlighted: string;
-};
-
-type Questions = Record<string, Question>;
-
 export function Room() {
   const params = useParams<RoomParams>();
   const roomId = params.id;
   const { user } = useAuth();
-
   const [newQuestion, setNewQuestion] = useState('');
-  const [roomName, setRoomName] = useState('');
-  const [questions, setQuestions] = useState<Question[]>([]);
+  const { questions, roomName } = useRoom(roomId);
 
   async function handleAskQuestion(event: FormEvent) {
     event.preventDefault();
@@ -57,27 +43,6 @@ export function Room() {
     setNewQuestion('');
   }
 
-  useEffect(() => {
-    const roomRef = database.ref(`rooms/${roomId}`);
-
-    roomRef.once('value', (room: any) => {
-      const fbQuestions: Questions = room.val().questions;
-
-      const parsedQuestions = Object.entries(fbQuestions).map(([key, value]) => {
-        return {
-          id: key,
-          content: value.content,
-          author: value.author,
-          isHighlighted: value.isHighlighted,
-          isAnswered: value.isAnswered,
-        };
-      });
-
-      setQuestions(parsedQuestions);
-
-      setRoomName(room.val().title);
-    });
-  }, [roomId]);
   return (
     <div id="page-room">
       <header>
@@ -123,6 +88,12 @@ export function Room() {
             </Button>
           </div>
         </form>
+
+        <div className="question-list">
+          {questions.map((question, index) => {
+            return <Question content={question.content} author={question.author} key={index} />;
+          })}
+        </div>
       </main>
     </div>
   );
