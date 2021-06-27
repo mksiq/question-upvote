@@ -2,14 +2,28 @@ import logoImg from '../assets/images/logo.svg';
 import '../styles/room.scss';
 import { Button } from '../components/Button';
 import { RoomCode } from '../components/RoomCode';
-import { useParams } from 'react-router-dom';
-import { FormEvent, useState } from 'react';
+import { Link, useParams } from 'react-router-dom';
+import { FormEvent, useEffect, useState } from 'react';
 import { useAuth } from '../hook/useAuth';
 import { database } from '../services/firebase';
+import { convertCompilerOptionsFromJson } from 'typescript';
 
 type RoomParams = {
   id: string;
 };
+
+type Question = {
+  id?: string;
+  author: {
+    name: string;
+    avatar: string;
+  };
+  content: string;
+  isAnswered: string;
+  isHighlighted: string;
+};
+
+type Questions = Record<string, Question>;
 
 export function Room() {
   const params = useParams<RoomParams>();
@@ -17,6 +31,8 @@ export function Room() {
   const { user } = useAuth();
 
   const [newQuestion, setNewQuestion] = useState('');
+  const [roomName, setRoomName] = useState('');
+  const [questions, setQuestions] = useState<Question[]>([]);
 
   async function handleAskQuestion(event: FormEvent) {
     event.preventDefault();
@@ -41,6 +57,27 @@ export function Room() {
     setNewQuestion('');
   }
 
+  useEffect(() => {
+    const roomRef = database.ref(`rooms/${roomId}`);
+
+    roomRef.once('value', (room: any) => {
+      const fbQuestions: Questions = room.val().questions;
+
+      const parsedQuestions = Object.entries(fbQuestions).map(([key, value]) => {
+        return {
+          id: key,
+          content: value.content,
+          author: value.author,
+          isHighlighted: value.isHighlighted,
+          isAnswered: value.isAnswered,
+        };
+      });
+
+      setQuestions(parsedQuestions);
+
+      setRoomName(room.val().title);
+    });
+  }, [roomId]);
   return (
     <div id="page-room">
       <header>
@@ -52,8 +89,12 @@ export function Room() {
 
       <main>
         <div className="room-title">
-          <h1>Room Name</h1>
-          <span>3 Questions</span>
+          <h1>Room Name: {roomName}</h1>
+          {questions.length > 0 && (
+            <span>
+              {questions.length} {questions.length === 1 ? 'Question' : 'Questions'}ß
+            </span>
+          )}
         </div>
 
         <form onSubmit={handleAskQuestion}>
@@ -70,7 +111,10 @@ export function Room() {
               </div>
             ) : (
               <span>
-                To ask, <button> log in</button>
+                To ask,{' '}
+                <Link to="/">
+                  <button> log in</button>
+                </Link>
               </span>
             )}
 
