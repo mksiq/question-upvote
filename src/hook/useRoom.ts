@@ -1,36 +1,39 @@
 import { useEffect, useState } from 'react';
 import { database } from '../services/firebase';
-import { QuestionsRecord, QuestionType } from '../types';
-
+import { FirebaseQuestions, QuestionType } from '../types';
+import { useAuth } from './useAuth';
 export function useRoom(roomId: string) {
-  const [roomName, setRoomName] = useState('');
+  const { user } = useAuth();
   const [questions, setQuestions] = useState<QuestionType[]>([]);
+  const [title, setTitle] = useState('');
 
   useEffect(() => {
     const roomRef = database.ref(`rooms/${roomId}`);
 
-    roomRef.once('value', (room: any) => {
-      const fbQuestions: QuestionsRecord = room.val().questions;
-      console.log(fbQuestions);
-      if (fbQuestions) {
-        const parsedQuestions = Object.entries(fbQuestions).map(([key, value]) => {
-          return {
-            id: key,
-            content: value.content,
-            author: value.author,
-            isHighlighted: value.isHighlighted,
-            isAnswered: value.isAnswered,
-          };
-        });
+    roomRef.on('value', (room) => {
+      const databaseRoom = room.val();
+      const firebaseQuestions: FirebaseQuestions = databaseRoom.questions ?? {};
 
-        setQuestions(parsedQuestions);
-      } else {
-        setQuestions([]);
-      }
+      const parsedQuestions = Object.entries(firebaseQuestions).map(([key, value]) => {
+        return {
+          id: key,
+          content: value.content,
+          author: value.author,
+          isHighlighted: value.isHighlighted,
+          isAnswered: value.isAnswered,
+          likeCount: Object.values(value.likes ?? {}).length,
+          likeId: Object.entries(value.likes ?? {}).find(([key, like]) => like.authorId === user?.id)?.[0],
+        };
+      });
 
-      setRoomName(room.val().title);
+      setTitle(databaseRoom.title);
+      setQuestions(parsedQuestions);
     });
-  }, [roomId]);
 
-  return { questions, roomName };
+    return () => {
+      roomRef.off('value');
+    };
+  }, [roomId, user?.id]);
+
+  return { questions, title };
 }

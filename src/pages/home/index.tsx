@@ -13,6 +13,7 @@ export function Home() {
   const { user, signInWithGoogle } = useAuth();
   const [room, setRoom] = useState('');
   const [error, setError] = useState(false);
+  const [errorEndedRoom, setErrorEndedRoom] = useState(false);
 
   async function handleCreateRoom() {
     if (!user) {
@@ -33,8 +34,16 @@ export function Home() {
     if (!roomRef.exists()) {
       setError(true);
       return;
+    } else {
+      setError(false);
     }
-    setError(false);
+
+    if (roomRef.val().endedAt) {
+      setErrorEndedRoom(true);
+      return;
+    } else {
+      setErrorEndedRoom(false);
+    }
 
     history.push(`/rooms/${room}`);
   }
@@ -62,7 +71,8 @@ export function Home() {
             />
             <br />
             <Button type="submit">Join</Button>
-            {error ? <div className="error-message">Room does not exist. 😞</div> : <></>}
+            {error && <div className="error-message">Room does not exist. 😞</div>}
+            {errorEndedRoom && <div className="error-message">Room already closed. 😞</div>}
           </form>
         </div>
       </main>

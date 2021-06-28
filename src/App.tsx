@@ -4,6 +4,7 @@ import { NewRoom } from './pages/new-room';
 import { BrowserRouter, Switch, Route } from 'react-router-dom';
 import { AuthContextProvider } from './contexts/AuthContexts';
 import { Room } from './pages/room';
+import { AdminRoom } from './pages/admin-room';
 
 function App() {
   return (
@@ -14,6 +15,7 @@ function App() {
             <Route path="/" exact component={Home} />
             <Route path="/rooms/new" component={NewRoom} />
             <Route path="/rooms/:id" component={Room} />
+            <Route path="/admin/rooms/:id" component={AdminRoom} />
           </Switch>
         </AuthContextProvider>
       </BrowserRouter>
